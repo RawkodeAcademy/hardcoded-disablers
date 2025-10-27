@@ -49,24 +49,36 @@ func handleOp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req OpRequest
+	// Tolerate invalid JSON - return null instead of error
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		response := OpResponse{
+			Key:      "normalized",
+			Value:    nil,
+			CacheHit: false,
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	var normalized *string
-	if req.Text != nil {
-		norm := normalizeText(*req.Text)
-		normalized = &norm
+	// Process text if available, otherwise return null
+	var normalizedValue interface{}
+	if req.Text != nil && *req.Text != "" {
+		normalized := normalizeText(*req.Text)
+		normalizedValue = normalized
+	} else {
+		normalizedValue = nil
 	}
 
 	response := OpResponse{
 		Key:      "normalized",
-		Value:    normalized,
+		Value:    normalizedValue,
 		CacheHit: false,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
 
