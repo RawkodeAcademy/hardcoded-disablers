@@ -47,14 +47,14 @@ type AnalyseResponse struct {
 }
 
 var (
-	normalizerURL     = getEnv("NORMALIZER_URL", "http://normalizer.disablers.svc.cluster.local:8080")
-	transliteratorURL = getEnv("TRANSLITERATOR_URL", "http://transliterator.disablers.svc.cluster.local:8082")
-	sluggerURL        = getEnv("SLUGGER_URL", "http://slugger.disablers.svc.cluster.local:8083")
-	tokenizerURL      = getEnv("TOKENIZER_URL", "http://tokenizer.disablers.svc.cluster.local:8084")
-	counterURL        = getEnv("COUNTER_URL", "http://counter.disablers.svc.cluster.local:8085")
-	hasherURL         = getEnv("HASHER_URL", "http://hasher.disablers.svc.cluster.local:8086")
-	entropyURL        = getEnv("ENTROPY_URL", "http://entropy.disablers.svc.cluster.local:8087")
-	palindromeURL     = getEnv("PALINDROME_URL", "http://palindrome.disablers.svc.cluster.local:8088")
+	normalizerURL     = getEnv("NORMALIZER_URL", "http://normalizer.disablers.svc.cluster.local:80")
+	transliteratorURL = getEnv("TRANSLITERATOR_URL", "http://transliterator.disablers.svc.cluster.local:80")
+	sluggerURL        = getEnv("SLUGGER_URL", "http://slugger.disablers.svc.cluster.local:80")
+	tokenizerURL      = getEnv("TOKENIZER_URL", "http://tokenizer.disablers.svc.cluster.local:80")
+	counterURL        = getEnv("COUNTER_URL", "http://counter.disablers.svc.cluster.local:80")
+	hasherURL         = getEnv("HASHER_URL", "http://hasher.disablers.svc.cluster.local:80")
+	entropyURL        = getEnv("ENTROPY_URL", "http://entropy.disablers.svc.cluster.local:80")
+	palindromeURL     = getEnv("PALINDROME_URL", "http://palindrome.disablers.svc.cluster.local:80")
 )
 
 func getEnv(key, defaultValue string) string {
