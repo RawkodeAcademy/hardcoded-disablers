@@ -159,22 +159,22 @@ func aggregateAnalysis(text string) (*AnalyseResponse, error) {
 		}
 	}()
 
-	// // Call transliterator service
-	// wg.Add(1)
-	// go func() {
-	// 	defer wg.Done()
-	// 	if resp, err := callMicroservice(transliteratorURL, text); err == nil {
-	// 		if transliterated, ok := resp.Value.(string); ok {
-	// 			mu.Lock()
-	// 			response.Transliterated = transliterated
-	// 			mu.Unlock()
-	// 		}
-	// 	} else {
-	// 		mu.Lock()
-	// 		errors = append(errors, fmt.Errorf("transliterator: %w", err))
-	// 		mu.Unlock()
-	// 	}
-	// }()
+	// Call transliterator service
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if resp, err := callMicroservice(transliteratorURL, text); err == nil {
+			if transliterated, ok := resp.Value.(string); ok {
+				mu.Lock()
+				response.Transliterated = transliterated
+				mu.Unlock()
+			}
+		} else {
+			mu.Lock()
+			errors = append(errors, fmt.Errorf("transliterator: %w", err))
+			mu.Unlock()
+		}
+	}()
 
 	// Call slugger service
 	wg.Add(1)
