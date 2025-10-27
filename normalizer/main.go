@@ -25,6 +25,12 @@ type OpResponse struct {
 	Key      string      `json:"key"`
 	Value    interface{} `json:"value"`
 	CacheHit bool        `json:"cache_hit"`
+	Error    string      `json:"error,omitempty"`
+}
+
+type ValidationResult struct {
+	Valid bool
+	Error string
 }
 
 // Global request counter
@@ -49,26 +55,37 @@ func handleOp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req OpRequest
-	// Tolerate invalid JSON - return null instead of error
+	var validationResult ValidationResult
+
+	// Parse and validate JSON
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response := OpResponse{
-			Key:      "normalized",
-			Value:    nil,
-			CacheHit: false,
+		validationResult = ValidationResult{
+			Valid: false,
+			Error: fmt.Sprintf("Invalid JSON: %s", err.Error()),
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(response)
-		return
+	} else {
+		validationResult = validateInput(req)
 	}
 
-	// Process text if available, otherwise return null
+	// Process based on validation result
 	var normalizedValue interface{}
-	if req.Text != nil && *req.Text != "" {
-		normalized := normalizeText(*req.Text)
-		normalizedValue = normalized
+	var errorMsg string
+
+	if !validationResult.Valid {
+		normalizedValue = nil
+		errorMsg = validationResult.Error
+	} else if req.Text != nil && *req.Text != "" {
+		// Additional runtime validation
+		if len(*req.Text) > 10000 { // Limit text length
+			normalizedValue = nil
+			errorMsg = "Text too long (max 10000 characters)"
+		} else {
+			normalized := normalizeText(*req.Text)
+			normalizedValue = normalized
+		}
 	} else {
 		normalizedValue = nil
+		errorMsg = "No text provided or empty text"
 	}
 
 	response := OpResponse{
@@ -77,9 +94,95 @@ func handleOp(w http.ResponseWriter, r *http.Request) {
 		CacheHit: false,
 	}
 
+	// Include error message if present
+	if errorMsg != "" {
+		response.Error = errorMsg
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+}
+
+// validateInput performs comprehensive input validation
+func validateInput(req OpRequest) ValidationResult {
+	// Check if request is completely empty
+	if req.Text == nil && req.Deps == nil {
+		return ValidationResult{
+			Valid: false,
+			Error: "Request body must contain either 'text' or 'deps' field",
+		}
+	}
+
+	// Validate text field if present
+	if req.Text != nil {
+		if len(*req.Text) == 0 {
+			return ValidationResult{
+				Valid: false,
+				Error: "Text field cannot be empty string",
+			}
+		}
+
+		// Check for invalid characters or encoding issues
+		if !isValidUTF8(*req.Text) {
+			return ValidationResult{
+				Valid: false,
+				Error: "Text contains invalid UTF-8 characters",
+			}
+		}
+	}
+
+	// Validate deps structure if present
+	if req.Deps != nil {
+		if err := validateDeps(*req.Deps); err != "" {
+			return ValidationResult{
+				Valid: false,
+				Error: err,
+			}
+		}
+	}
+
+	return ValidationResult{Valid: true, Error: ""}
+}
+
+// validateDeps validates the deps structure
+func validateDeps(deps struct {
+	Normalized     *string  `json:"normalized,omitempty"`
+	Transliterated *string  `json:"transliterated,omitempty"`
+	Tokens         []string `json:"tokens,omitempty"`
+}) string {
+	// Validate normalized field
+	if deps.Normalized != nil && len(*deps.Normalized) > 10000 {
+		return "deps.normalized too long (max 10000 characters)"
+	}
+
+	// Validate transliterated field
+	if deps.Transliterated != nil && len(*deps.Transliterated) > 10000 {
+		return "deps.transliterated too long (max 10000 characters)"
+	}
+
+	// Validate tokens array
+	if len(deps.Tokens) > 1000 {
+		return "deps.tokens array too large (max 1000 items)"
+	}
+
+	for i, token := range deps.Tokens {
+		if len(token) > 100 {
+			return fmt.Sprintf("deps.tokens[%d] too long (max 100 characters)", i)
+		}
+	}
+
+	return ""
+}
+
+// isValidUTF8 checks if string contains valid UTF-8
+func isValidUTF8(s string) bool {
+	for _, r := range s {
+		if r == unicode.ReplacementChar {
+			return false
+		}
+	}
+	return true
 }
 
 // normalizeText applies NFKC normalization, lowercasing, whitespace collapsing, and diacritic stripping
