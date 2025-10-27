@@ -159,132 +159,132 @@ func aggregateAnalysis(text string) (*AnalyseResponse, error) {
 		}
 	}()
 
-	// Call transliterator service
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if resp, err := callMicroservice(transliteratorURL, text); err == nil {
-			if transliterated, ok := resp.Value.(string); ok {
-				mu.Lock()
-				response.Transliterated = transliterated
-				mu.Unlock()
-			}
-		} else {
-			mu.Lock()
-			errors = append(errors, fmt.Errorf("transliterator: %w", err))
-			mu.Unlock()
-		}
-	}()
+	// // Call transliterator service
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	if resp, err := callMicroservice(transliteratorURL, text); err == nil {
+	// 		if transliterated, ok := resp.Value.(string); ok {
+	// 			mu.Lock()
+	// 			response.Transliterated = transliterated
+	// 			mu.Unlock()
+	// 		}
+	// 	} else {
+	// 		mu.Lock()
+	// 		errors = append(errors, fmt.Errorf("transliterator: %w", err))
+	// 		mu.Unlock()
+	// 	}
+	// }()
 
-	// Call slugger service
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if resp, err := callMicroservice(sluggerURL, text); err == nil {
-			if slug, ok := resp.Value.(string); ok {
-				mu.Lock()
-				response.Slug = slug
-				mu.Unlock()
-			}
-		} else {
-			mu.Lock()
-			errors = append(errors, fmt.Errorf("slugger: %w", err))
-			mu.Unlock()
-		}
-	}()
+	// // Call slugger service
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	if resp, err := callMicroservice(sluggerURL, text); err == nil {
+	// 		if slug, ok := resp.Value.(string); ok {
+	// 			mu.Lock()
+	// 			response.Slug = slug
+	// 			mu.Unlock()
+	// 		}
+	// 	} else {
+	// 		mu.Lock()
+	// 		errors = append(errors, fmt.Errorf("slugger: %w", err))
+	// 		mu.Unlock()
+	// 	}
+	// }()
 
-	// Call tokenizer service
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if resp, err := callMicroservice(tokenizerURL, text); err == nil {
-			if tokens, ok := resp.Value.(float64); ok {
-				mu.Lock()
-				response.Tokens = int(tokens)
-				mu.Unlock()
-			}
-		} else {
-			mu.Lock()
-			errors = append(errors, fmt.Errorf("tokenizer: %w", err))
-			mu.Unlock()
-		}
-	}()
+	// // Call tokenizer service
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	if resp, err := callMicroservice(tokenizerURL, text); err == nil {
+	// 		if tokens, ok := resp.Value.(float64); ok {
+	// 			mu.Lock()
+	// 			response.Tokens = int(tokens)
+	// 			mu.Unlock()
+	// 		}
+	// 	} else {
+	// 		mu.Lock()
+	// 		errors = append(errors, fmt.Errorf("tokenizer: %w", err))
+	// 		mu.Unlock()
+	// 	}
+	// }()
 
-	// Call counter service for unique words, bigrams, and unique chars
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if resp, err := callMicroservice(counterURL, text); err == nil {
-			if data, ok := resp.Value.(map[string]interface{}); ok {
-				mu.Lock()
-				if uniqueWords, ok := data["unique_words"].(float64); ok {
-					response.UniqueWords = int(uniqueWords)
-				}
-				if bigramCount, ok := data["bigram_count"].(float64); ok {
-					response.BigramCount = int(bigramCount)
-				}
-				if uniqueChars, ok := data["unique_chars"].(float64); ok {
-					response.UniqueChars = int(uniqueChars)
-				}
-				mu.Unlock()
-			}
-		} else {
-			mu.Lock()
-			errors = append(errors, fmt.Errorf("counter: %w", err))
-			mu.Unlock()
-		}
-	}()
+	// // Call counter service for unique words, bigrams, and unique chars
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	if resp, err := callMicroservice(counterURL, text); err == nil {
+	// 		if data, ok := resp.Value.(map[string]interface{}); ok {
+	// 			mu.Lock()
+	// 			if uniqueWords, ok := data["unique_words"].(float64); ok {
+	// 				response.UniqueWords = int(uniqueWords)
+	// 			}
+	// 			if bigramCount, ok := data["bigram_count"].(float64); ok {
+	// 				response.BigramCount = int(bigramCount)
+	// 			}
+	// 			if uniqueChars, ok := data["unique_chars"].(float64); ok {
+	// 				response.UniqueChars = int(uniqueChars)
+	// 			}
+	// 			mu.Unlock()
+	// 		}
+	// 	} else {
+	// 		mu.Lock()
+	// 		errors = append(errors, fmt.Errorf("counter: %w", err))
+	// 		mu.Unlock()
+	// 	}
+	// }()
 
-	// Call hasher service
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if resp, err := callMicroservice(hasherURL, text); err == nil {
-			if hash, ok := resp.Value.(string); ok {
-				mu.Lock()
-				response.Hash64 = hash
-				mu.Unlock()
-			}
-		} else {
-			mu.Lock()
-			errors = append(errors, fmt.Errorf("hasher: %w", err))
-			mu.Unlock()
-		}
-	}()
+	// // Call hasher service
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	if resp, err := callMicroservice(hasherURL, text); err == nil {
+	// 		if hash, ok := resp.Value.(string); ok {
+	// 			mu.Lock()
+	// 			response.Hash64 = hash
+	// 			mu.Unlock()
+	// 		}
+	// 	} else {
+	// 		mu.Lock()
+	// 		errors = append(errors, fmt.Errorf("hasher: %w", err))
+	// 		mu.Unlock()
+	// 	}
+	// }()
 
-	// Call entropy service
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if resp, err := callMicroservice(entropyURL, text); err == nil {
-			if entropy, ok := resp.Value.(float64); ok {
-				mu.Lock()
-				response.Entropy = entropy
-				mu.Unlock()
-			}
-		} else {
-			mu.Lock()
-			errors = append(errors, fmt.Errorf("entropy: %w", err))
-			mu.Unlock()
-		}
-	}()
+	// // Call entropy service
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	if resp, err := callMicroservice(entropyURL, text); err == nil {
+	// 		if entropy, ok := resp.Value.(float64); ok {
+	// 			mu.Lock()
+	// 			response.Entropy = entropy
+	// 			mu.Unlock()
+	// 		}
+	// 	} else {
+	// 		mu.Lock()
+	// 		errors = append(errors, fmt.Errorf("entropy: %w", err))
+	// 		mu.Unlock()
+	// 	}
+	// }()
 
-	// Call palindrome service
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if resp, err := callMicroservice(palindromeURL, text); err == nil {
-			if palindrome, ok := resp.Value.(bool); ok {
-				mu.Lock()
-				response.Palindrome = palindrome
-				mu.Unlock()
-			}
-		} else {
-			mu.Lock()
-			errors = append(errors, fmt.Errorf("palindrome: %w", err))
-			mu.Unlock()
-		}
-	}()
+	// // Call palindrome service
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	if resp, err := callMicroservice(palindromeURL, text); err == nil {
+	// 		if palindrome, ok := resp.Value.(bool); ok {
+	// 			mu.Lock()
+	// 			response.Palindrome = palindrome
+	// 			mu.Unlock()
+	// 		}
+	// 	} else {
+	// 		mu.Lock()
+	// 		errors = append(errors, fmt.Errorf("palindrome: %w", err))
+	// 		mu.Unlock()
+	// 	}
+	// }()
 
 	wg.Wait()
 
