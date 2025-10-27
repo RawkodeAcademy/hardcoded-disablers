@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: normalizer
-          image: ttl.sh/normalizer-1761555616-18598:1h
+          image: ttl.sh/normalizer-1761556878-29966:1h
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

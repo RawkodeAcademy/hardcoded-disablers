@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: aggregator
-          image: ttl.sh/aggregator-1761555616-18598:1h
+          image: ttl.sh/aggregator-1761556878-29966:1h
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
