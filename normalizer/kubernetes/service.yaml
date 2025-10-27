@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: normalizer
+  labels:
+    app: normalizer
+spec:
+  selector:
+    app: normalizer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080

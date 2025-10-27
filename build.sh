@@ -71,6 +71,40 @@ else:
 PYTHON
 }
 
+ensure_service_manifest() {
+  local service_dir="$1"
+  local service_name="$2"
+
+  local service_file=""
+  for candidate in "$service_dir"/kubernetes/service.yaml "$service_dir"/kubernetes/service.yml; do
+    if [[ -f "$candidate" ]]; then
+      service_file="$candidate"
+      break
+    fi
+  done
+
+  if [[ -n "$service_file" ]]; then
+    return
+  fi
+
+  service_file="$service_dir/kubernetes/service.yaml"
+  cat >"$service_file" <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${service_name}
+  labels:
+    app: ${service_name}
+spec:
+  selector:
+    app: ${service_name}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+EOF
+}
+
 build_and_push() {
   local service_dir="$1"
   local service_name="$2"
@@ -93,6 +127,7 @@ for service_dir in "$ROOT_DIR"/*/; do
 
   build_and_push "$service_dir" "$service_name" "$image_tag"
   update_manifest "$service_dir" "$image_tag"
+  ensure_service_manifest "$service_dir" "$service_name"
 
   services_found=$((services_found + 1))
 done
