@@ -32,18 +32,10 @@ type AnalyseRequest struct {
 }
 
 type AnalyseResponse struct {
-	Normalized     string  `json:"normalized"`
-	Transliterated string  `json:"transliterated"`
-	Slug           string  `json:"slug"`
-	Tokens         int     `json:"tokens"`
-	UniqueWords    int     `json:"unique_words"`
-	BigramCount    int     `json:"bigram_count"`
-	CharCount      int     `json:"char_count"`
-	UniqueChars    int     `json:"unique_chars"`
-	Hash64         string  `json:"hash64"`
-	Entropy        float64 `json:"entropy"`
-	Palindrome     bool    `json:"palindrome"`
-	Degraded       bool    `json:"degraded"`
+	Normalized     string `json:"normalized"`
+	Transliterated string `json:"transliterated"`
+	Slug           string `json:"slug"`
+	Degraded       bool   `json:"degraded"`
 }
 
 var (
@@ -136,8 +128,7 @@ func aggregateAnalysis(text string) (*AnalyseResponse, error) {
 	var mu sync.Mutex
 
 	response := &AnalyseResponse{
-		CharCount: len(text),
-		Degraded:  false,
+		Degraded: false,
 	}
 
 	errors := make([]error, 0)
