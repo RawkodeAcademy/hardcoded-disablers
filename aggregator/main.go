@@ -176,22 +176,22 @@ func aggregateAnalysis(text string) (*AnalyseResponse, error) {
 	// 	}
 	// }()
 
-	// // Call slugger service
-	// wg.Add(1)
-	// go func() {
-	// 	defer wg.Done()
-	// 	if resp, err := callMicroservice(sluggerURL, text); err == nil {
-	// 		if slug, ok := resp.Value.(string); ok {
-	// 			mu.Lock()
-	// 			response.Slug = slug
-	// 			mu.Unlock()
-	// 		}
-	// 	} else {
-	// 		mu.Lock()
-	// 		errors = append(errors, fmt.Errorf("slugger: %w", err))
-	// 		mu.Unlock()
-	// 	}
-	// }()
+	// Call slugger service
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if resp, err := callMicroservice(sluggerURL, text); err == nil {
+			if slug, ok := resp.Value.(string); ok {
+				mu.Lock()
+				response.Slug = slug
+				mu.Unlock()
+			}
+		} else {
+			mu.Lock()
+			errors = append(errors, fmt.Errorf("slugger: %w", err))
+			mu.Unlock()
+		}
+	}()
 
 	// // Call tokenizer service
 	// wg.Add(1)
