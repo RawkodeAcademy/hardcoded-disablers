@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: aggregator
+  name: slugger
   labels:
-    app: aggregator
+    app: slugger
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: aggregator
+      app: slugger
   template:
     metadata:
       labels:
-        app: aggregator
+        app: slugger
     spec:
       containers:
-        - name: aggregator
-          image: ttl.sh/aggregator-1761555347-25423:1h
+        - name: slugger
+          image: ttl.sh/slugger-1761555347-25423:1h
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
