@@ -1,18 +1,16 @@
-FROM golang:1.21-alpine AS builder
+FROM golang:1.22-alpine AS builder
+WORKDIR /src
+ENV GOTOOLCHAIN=auto
 
-WORKDIR /app
-COPY go.mod go.sum ./
+# Install modules separately to maximize Docker layer caching.
+COPY go.mod ./
 RUN go mod download
 
+# Build the static binary for Linux.
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o aggregator .
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/aggregator .
 
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
-WORKDIR /root/
-
-COPY --from=builder /app/aggregator .
-
+FROM scratch
+COPY --from=builder /out/aggregator /aggregator
 EXPOSE 8080
-
-CMD ["./aggregator"]
+ENTRYPOINT ["/aggregator"]
