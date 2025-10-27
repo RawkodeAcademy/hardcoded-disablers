@@ -88,6 +88,7 @@ ensure_service_manifest() {
   fi
 
   service_file="$service_dir/kubernetes/service.yaml"
+  mkdir -p "$(dirname "$service_file")"
   cat >"$service_file" <<EOF
 apiVersion: v1
 kind: Service
