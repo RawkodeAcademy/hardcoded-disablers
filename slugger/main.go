@@ -140,7 +140,7 @@ func validateInput(req OpRequest) ValidationResult {
 				Error: "Text field cannot be empty string",
 			}
 		}
-		
+
 		// Check for invalid characters or encoding issues
 		if !isValidUTF8(*req.Text) {
 			return ValidationResult{
@@ -173,23 +173,23 @@ func validateDeps(deps struct {
 	if deps.Normalized != nil && len(*deps.Normalized) > 10000 {
 		return "deps.normalized too long (max 10000 characters)"
 	}
-	
-	// Validate transliterated field  
+
+	// Validate transliterated field
 	if deps.Transliterated != nil && len(*deps.Transliterated) > 10000 {
 		return "deps.transliterated too long (max 10000 characters)"
 	}
-	
+
 	// Validate tokens array
 	if len(deps.Tokens) > 1000 {
 		return "deps.tokens array too large (max 1000 items)"
 	}
-	
+
 	for i, token := range deps.Tokens {
 		if len(token) > 100 {
 			return fmt.Sprintf("deps.tokens[%d] too long (max 100 characters)", i)
 		}
 	}
-	
+
 	return ""
 }
 
@@ -207,34 +207,34 @@ func isValidUTF8(s string) bool {
 func generateSlug(s string) string {
 	// Convert to lowercase
 	text := strings.ToLower(s)
-	
+
 	// Replace any non-alphanumeric characters with spaces
 	reg := regexp.MustCompile(`[^a-z0-9\s]+`)
 	text = reg.ReplaceAllString(text, " ")
-	
+
 	// Split into words and filter out empty strings
 	words := strings.Fields(text)
 	var validWords []string
-	
+
 	for _, word := range words {
 		// Only keep words that contain alphanumeric characters
 		if regexp.MustCompile(`[a-z0-9]`).MatchString(word) {
 			validWords = append(validWords, word)
 		}
 	}
-	
+
 	if len(validWords) == 0 {
 		return ""
 	}
-	
+
 	// Join words with hyphens
 	slug := strings.Join(validWords, "-")
-	
+
 	// Ensure max 64 characters
 	if len(slug) > 64 {
 		// Try to truncate at word boundaries
 		slug = truncateSlugAtWordBoundary(slug, 64)
-		
+
 		// If still too long, hard truncate
 		if len(slug) > 64 {
 			slug = slug[:64]
@@ -242,10 +242,10 @@ func generateSlug(s string) string {
 			slug = strings.TrimSuffix(slug, "-")
 		}
 	}
-	
+
 	// Clean up any edge cases (double hyphens, leading/trailing hyphens)
 	slug = cleanupSlug(slug)
-	
+
 	return slug
 }
 
@@ -254,15 +254,15 @@ func truncateSlugAtWordBoundary(slug string, maxLen int) string {
 	if len(slug) <= maxLen {
 		return slug
 	}
-	
+
 	// Find the last hyphen before the limit
 	truncated := slug[:maxLen]
 	lastHyphen := strings.LastIndex(truncated, "-")
-	
+
 	if lastHyphen > 0 {
 		return slug[:lastHyphen]
 	}
-	
+
 	return truncated
 }
 
@@ -272,10 +272,10 @@ func cleanupSlug(slug string) string {
 	for strings.Contains(slug, "--") {
 		slug = strings.ReplaceAll(slug, "--", "-")
 	}
-	
+
 	// Trim leading and trailing hyphens
 	slug = strings.Trim(slug, "-")
-	
+
 	return slug
 }
 
