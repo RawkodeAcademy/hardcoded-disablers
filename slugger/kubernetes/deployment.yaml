@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: slugger
-          image: ttl.sh/slugger-1761555347-25423:1h
+          image: ttl.sh/slugger-1761555616-18598:1h
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
